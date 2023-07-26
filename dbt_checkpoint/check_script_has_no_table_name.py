@@ -66,7 +66,7 @@ def has_table_name(
     cte = set()
 
     for prev, cur, nxt in prev_cur_next_iter(sql_split):
-        if prev in ["from", "join"] and cur not in IGNORE_WORDS:
+        if prev in ["from", "join"] and cur not in IGNORE_WORDS and not re.match(r"extract\(.*from.*\)", cur, re.I):
             table = cur.lower().strip().replace(",", "") if cur else cur
             if dotless and "." not in table:
                 pass
