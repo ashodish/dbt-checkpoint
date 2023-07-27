@@ -16,7 +16,7 @@ from dbt_checkpoint.utils import (
 
 REGEX_COMMENTS = r"(?<=(\/\*|\{#))((.|[\r\n])+?)(?=(\*+\/|#\}))|[ \t]*--.*"
 REGEX_SPLIT = r"[\s]+"
-IGNORE_WORDS = ["", "(", "{{", "{"]  # pragma: no mutate
+IGNORE_WORDS = ["", "(", "{{", "{", r"(?i)extract\s*\("] # pragma: no mutate
 REGEX_PARENTHESIS = r"([\(\)])"  # pragma: no mutate
 REGEX_BRACES = r"([\{\}])"  # pragma: no mutate
 
@@ -67,12 +67,12 @@ def has_table_name(
 
     for prev, cur, nxt in prev_cur_next_iter(sql_split):
         if prev in ["from", "join"] and cur not in IGNORE_WORDS:
-            if not re.match(r"extract\(.*[Ff][Rr][Oo][Mm].*\)", cur):
-                table = cur.lower().strip().replace(",", "") if cur else cur
-                if dotless and "." not in table:
-                    pass
-                else:
-                    tables.add(table)
+            table = cur.lower().strip().replace(",", "") if cur else cur
+            if dotless and "." not in table:
+                pass
+            else:
+                tables.add(table)
+
         if (
             cur.lower() == "as" and nxt and nxt[0] == "(" and prev not in IGNORE_WORDS
         ):  # pragma: no mutate
@@ -82,7 +82,7 @@ def has_table_name(
     if table_names:
         status_code = 1
     return status_code, table_names
-
+    
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
