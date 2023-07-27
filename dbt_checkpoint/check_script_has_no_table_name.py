@@ -16,7 +16,7 @@ from dbt_checkpoint.utils import (
 
 REGEX_COMMENTS = r"(?<=(\/\*|\{#))((.|[\r\n])+?)(?=(\*+\/|#\}))|[ \t]*--.*"
 REGEX_SPLIT = r"[\s]+"
-IGNORE_WORDS = ["", "(", "{{", "{", r"(?i)extract\s*\("] # pragma: no mutate
+IGNORE_WORDS = ["", "(", "{{", "{"] # pragma: no mutate
 REGEX_PARENTHESIS = r"([\(\)])"  # pragma: no mutate
 REGEX_BRACES = r"([\{\}])"  # pragma: no mutate
 
@@ -30,6 +30,11 @@ def prev_cur_next_iter(
     try:
         while True:
             nxt = next(sql_iter).lower()  # pragma: no mutate
+
+            if cur == "from" and prev and re.match(r"(?i)extract\s*\(\s*\[.*\]", prev):
+                cur = nxt
+                nxt = next(sql_iter).lower() if nxt else None  # Skip the next word
+
             yield prev, cur, nxt
             prev = cur
             cur = nxt
